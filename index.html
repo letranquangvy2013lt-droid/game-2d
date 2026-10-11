@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game 2D của tôi</title>
+<style>
+body {
+  margin: 0;
+  text-align: center;
+  background: #87ceeb;
+  font-family: Arial, sans-serif;
+}
+canvas {
+  background: linear-gradient(#87ceeb 70%, #65c466 70%);
+  width: min(95vw, 800px);
+  border: 3px solid white;
+}
+</style>
+</head>
+<body>
+<h2>🎮 GAME 2D CỦA TÔI</h2>
+<p>Dùng ← → để chạy, phím Space để nhảy</p>
+<canvas id="game" width="800" height="400"></canvas>
+<script>
+const c = document.getElementById("game");
+const ctx = c.getContext("2d");
+const p = {x: 50, y: 300, w: 30, h: 40, vy: 0};
+let keys = {};
+let score = 0;
+let coins = Array.from({length: 8}, (_, i) => ({
+  x: 180 + i * 85, y: 285, got: false
+}));
+onkeydown = e => {
+  keys[e.code] = true;
+  if (["Space","ArrowLeft","ArrowRight"].includes(e.code))
+    e.preventDefault();
+};
+onkeyup = e => keys[e.code] = false;
+function draw() {
+  ctx.clearRect(0, 0, 800, 400);
+  ctx.fillStyle = "#269447";
+  ctx.fillRect(0, 350, 800, 50);
+  ctx.fillStyle = "#a96b37";
+  for (let x = 100; x < 800; x += 180)
+    ctx.fillRect(x, 260, 90, 15);
+  if (keys.ArrowRight) p.x += 4;
+  if (keys.ArrowLeft) p.x -= 4;
+  p.x = Math.max(0, Math.min(770, p.x));
+  p.vy += 0.6;
+  p.y += p.vy;
+  if (p.y + p.h >= 350) {
+    p.y = 350 - p.h;
+    p.vy = 0;
+  }
+  if (keys.Space && p.vy === 0) p.vy = -12;
+  ctx.fillStyle = "#e53935";
+  ctx.fillRect(p.x, p.y, p.w, p.h);
+  ctx.fillStyle = "#ffcf33";
+  for (const coin of coins) {
+    if (!coin.got &&
+        Math.abs(p.x + 15 - coin.x) < 25 &&
+        Math.abs(p.y + 20 - coin.y) < 30) {
+      coin.got = true;
+      score++;
+    }
+    if (!coin.got) {
+      ctx.beginPath();
+      ctx.arc(coin.x, coin.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.fillStyle = "#17324d";
+  ctx.font = "20px Arial";
+  ctx.fillText("Điểm: " + score, 15, 30);
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
